@@ -1,7 +1,7 @@
 /* Wraps the artifact-shaped source (no doctype/head/body — the Artifact
    runtime supplies those) into a self-contained page that can be hosted
    anywhere. Run: node build-standalone.mjs  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
 const SRC = 'founders-desk.html';
 const OUT = 'index.html';
@@ -11,11 +11,14 @@ let src = readFileSync(SRC, 'utf8');
 
 // The artifact needs photos inlined as data: URIs (its CSP blocks image files).
 // A self-hosted page must NOT — half a megabyte of base64 in the HTML defeats
-// browser caching. Point those <img>s back at the real files in /img.
-let restored = 0;
-src = src.replace(/<img data-src="(img\/[^"]+)" src="data:[^"]*"/g, (m, rel) => {
+// browser caching. Point those <img>s back at the real files in /img, and drop
+// the tag entirely where no file exists so the deployed page makes no dead
+// requests. The illustration fallback renders in its place either way.
+let restored = 0, dropped = 0;
+src = src.replace(/<img data-src="(img\/[^"]+)" src="[^"]*"([^>]*)>/g, (m, rel, rest) => {
+  if (!existsSync(rel)) { dropped++; return ''; }
   restored++;
-  return `<img src="${rel}"`;
+  return `<img src="${rel}"${rest}>`;
 });
 
 const at = src.indexOf(SPLIT);
@@ -37,4 +40,4 @@ ${body}
 </html>
 `, 'utf8');
 
-console.log(`${OUT} written — ${head.length} bytes head, ${body.length} bytes body, ${restored} photo(s) pointed at /img`);
+console.log(`${OUT} written — ${head.length} bytes head, ${body.length} bytes body, ${restored} photo(s) linked, ${dropped} dead tag(s) dropped`);
