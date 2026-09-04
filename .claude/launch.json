@@ -4,7 +4,9 @@
     {
       "name": "founders-desk",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["server.mjs"],
+      "runtimeArgs": [
+        "scripts/server.mjs"
+      ],
       "port": 4300
     }
   ]

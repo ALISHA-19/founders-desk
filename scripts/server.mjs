@@ -1,14 +1,14 @@
 /* Minimal static server for local preview — no dependencies.
-   node server.mjs   →   http://localhost:4300  */
+   node scripts/server.mjs   →   http://localhost:4300  */
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const PORT = 4300;
-// Serve relative to this file, not the shell's cwd — the launch config starts
-// it from the parent project root.
-const ROOT = dirname(fileURLToPath(import.meta.url));
+// Serve the repo root (this file lives in scripts/), not the shell's cwd —
+// the launch config starts it from the parent project directory.
+const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript',
   '.css': 'text/css', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',

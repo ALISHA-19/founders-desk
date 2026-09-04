@@ -30,20 +30,20 @@ Read this before sending the link to anyone who might act on it.
 ## Running it locally
 
 ```bash
-node server.mjs
+node scripts/server.mjs
 ```
 
 Then open http://localhost:4300. No dependencies, no build step required to view.
 
 ## Making changes
 
-`founders-desk.html` is the source of truth. `index.html` is generated — never edit it
+`src/founders-desk.html` is the source of truth. `index.html` is generated — never edit it
 directly, your changes will be overwritten.
 
 ```bash
-# 1. edit founders-desk.html
+# 1. edit src/founders-desk.html
 # 2. rebuild the deployable page
-node build-standalone.mjs
+node scripts/build-standalone.mjs
 # 3. ship it
 git add -A && git commit -m "..." && git push
 ```
@@ -52,9 +52,9 @@ GitHub Pages rebuilds in about a minute.
 
 ### Why two HTML files
 
-`founders-desk.html` is written for a sandbox that blocks external image files, so photos
+`src/founders-desk.html` is written for a sandbox that blocks external image files, so photos
 are embedded there as base64 `data:` URIs. A self-hosted page must not do that — half a
-megabyte of base64 in the HTML defeats browser caching. `build-standalone.mjs` wraps the
+megabyte of base64 in the HTML defeats browser caching. `scripts/build-standalone.mjs` wraps the
 source in a proper `<head>`/`<body>`, points images back at real files in `/img`, and drops
 `<img>` tags whose file doesn't exist so the live page makes no dead requests.
 
@@ -62,17 +62,17 @@ source in a proper `<head>`/`<body>`, points images back at real files in `/img`
 
 Every person and scene on the page is an inline SVG illustration sitting in a swap-slot.
 Drop a correctly-named file into `/img` and the photograph takes over automatically — no
-markup change. Remove the file and the illustration returns. See [`img/README.md`](img/README.md)
+markup change. Remove the file and the illustration returns. See [DOCS/04-photography.md](DOCS/04-photography.md)
 for filenames, aspect ratios and the shot list.
 
 ```bash
 # after adding or replacing a file in /img
-node inline-images.mjs      # only needed for the sandbox build
-node build-standalone.mjs
+node scripts/inline-images.mjs      # only needed for the sandbox build
+node scripts/build-standalone.mjs
 ```
 
 **Currently live:** illustrated portraits plus one real workshop photograph. Stock portraits
-were deliberately removed before deploying — see `img/README.md` for why.
+were deliberately removed before deploying — see [DOCS/04-photography.md](DOCS/04-photography.md) for why.
 
 ---
 
@@ -125,15 +125,31 @@ handling. All measured colour pairs pass WCAG AA.
 - [ ] DPDP: retention policy for the phone numbers you collect
 - [ ] Confirm the mentor-capacity claim stays true
 
-## Repo contents
+## Documentation
+
+Full docs live in **[DOCS/](DOCS/)** — start with [DOCS/README.md](DOCS/README.md).
+
+| | |
+|---|---|
+| [01 · Requirements](DOCS/01-requirements.md) | What was asked for, traced to what delivers it |
+| [02 · QA report](DOCS/02-qa-report.md) | Acceptance criteria, defects found, what's left open |
+| [03 · Technical handoff](DOCS/03-technical-handoff.md) | **Read before changing code.** Architecture, state model, build pipeline |
+| [04 · Photography](DOCS/04-photography.md) | Image specs, swap-slots, and the consent rules |
+| [05 · Analytics](DOCS/05-analytics.md) | Event list and the funnels worth building |
+
+## Repo structure
 
 ```
-founders-desk.html      source of truth (sandbox build, images inlined)
-index.html              generated — do not edit
-build-standalone.mjs    founders-desk.html → index.html
-inline-images.mjs       /img → base64 for the sandbox build
-server.mjs              zero-dependency local preview on :4300
-img/                    photographs + swap-slot documentation
-REQUIREMENTS.md         every requirement, traced to what delivers it
-QA-Report.md            acceptance criteria and defects found in testing
+├── index.html               generated — do not edit
+├── README.md                this file
+├── src/
+│   └── founders-desk.html   source of truth (sandbox build, images inlined)
+├── scripts/
+│   ├── build-standalone.mjs src/founders-desk.html → index.html
+│   ├── inline-images.mjs    /img → base64, for the sandbox build only
+│   └── server.mjs           zero-dependency local preview on :4300
+├── img/                     photographs, dropped into swap-slots
+└── DOCS/                    requirements, QA, handoff, photography, analytics
 ```
+
+`index.html` and `img/` must stay at the repo root — GitHub Pages serves from there.
